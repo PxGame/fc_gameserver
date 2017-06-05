@@ -9,9 +9,11 @@ void Database::Create(DbSetting setting)
         m_database = make_shared<Database>(setting);
         m_database->Init();
     }
-    catch (const std::exception& e)
+    catch (const exception& e)
     {
-        throw e;
+        std::stringstream ostr;
+        ostr << "[db]" << e.what();
+        throw runtime_error(ostr.str());
     }
 }
 
@@ -72,13 +74,15 @@ Connection *Database::Get()
 
         if (nullptr == conn)
         {//connection is invaild excption
-            throw runtime_error("connection is invaild.");
+            throw runtime_error("[db]connection is invaild.");
         }
     }
-    catch (const std::exception& e)
+    catch (const exception& e)
     {
         Destory(conn);
-        throw e;
+        std::stringstream ostr;
+        ostr << "[db]" << e.what();
+        throw runtime_error(ostr.str());
     }
 
     return conn;
@@ -118,9 +122,11 @@ Connection *Database::Create()
     {
         conn = m_driver->connect(m_setting.host, m_setting.username, m_setting.password);
     }
-    catch (const std::exception& e)
+    catch (const exception& e)
     {
-        throw e;
+        std::stringstream ostr;
+        ostr << "[db]" << e.what();
+        throw runtime_error(ostr.str());
     }
 
     return conn;
@@ -149,4 +155,153 @@ void Database::DestoryAll()
     {
         Destory(conn);
     }
+}
+
+//db operations =====================================================================
+
+void Database::AddUser(string gameid, string deviceid, string username, string devicetype, string devicemodel, int auth)
+{
+    try
+    {
+        shared_ptr<Connection> conn(Get(), [this](Connection* ptr){Release(ptr);});
+
+        shared_ptr<PreparedStatement> stmt;
+        shared_ptr<ResultSet> res;
+
+        stmt.reset(conn->prepareStatement(
+                       "call adduser(?,?,?,?,?,?)"));
+
+        stmt->setString(1, gameid.c_str());
+        stmt->setString(2, deviceid.c_str());
+        stmt->setString(3, username.c_str());
+        stmt->setString(4, devicetype.c_str());
+        stmt->setString(5, devicemodel.c_str());
+        stmt->setInt(6, auth);
+
+        res.reset(stmt->executeQuery());
+
+        for (;;)
+        {
+            while (res->next()) {
+                int errcode = res->getInt("errcode");
+                if (errcode != 0)
+                {
+                    std::stringstream ostr;
+                    ostr << "call adduser error code : " << errcode;
+                    throw runtime_error(ostr.str());
+                }
+                return;
+            }
+
+            if (stmt->getMoreResults())
+            {
+                res.reset(stmt->getResultSet());
+                continue;
+            }
+            break;
+        }
+    }
+    catch (const exception& e)
+    {
+        std::stringstream ostr;
+        ostr << "[db]" << e.what();
+        throw runtime_error(ostr.str());
+    }
+}
+
+void Database::AddRank(string gameid, string deviceid, int level, int score, int cleartime, string ip)
+{
+    try
+    {
+        shared_ptr<Connection> conn(Get(), [this](Connection* ptr){Release(ptr);});
+
+        shared_ptr<PreparedStatement> stmt;
+        shared_ptr<ResultSet> res;
+
+        stmt.reset(conn->prepareStatement(
+                       "call addrank(?,?,?,?,?,?)"));
+
+        stmt->setString(1, gameid.c_str());
+        stmt->setString(2, deviceid.c_str());
+        stmt->setInt(3, level);
+        stmt->setInt(4, score);
+        stmt->setInt(5, cleartime);
+        stmt->setString(6, ip.c_str());
+
+        res.reset(stmt->executeQuery());
+
+        for (;;)
+        {
+            while (res->next()) {
+                int errcode = res->getInt("errcode");
+                if (errcode != 0)
+                {
+                    std::stringstream ostr;
+                    ostr << "call addrank error code : " << errcode;
+                    throw runtime_error(ostr.str());
+                }
+                return;
+            }
+
+            if (stmt->getMoreResults())
+            {
+                res.reset(stmt->getResultSet());
+                continue;
+            }
+            break;
+        }
+    }
+    catch (const exception& e)
+    {
+        std::stringstream ostr;
+        ostr << "[db]" << e.what();
+        throw runtime_error(ostr.str());
+    }
+}
+
+list<RankItem> Database::QueryRank(string gameid, int level, int cnt)
+{
+    list<RankItem> items;
+    try
+    {
+        shared_ptr<Connection> conn(Get(), [this](Connection* ptr){Release(ptr);});
+
+        shared_ptr<PreparedStatement> stmt;
+        shared_ptr<ResultSet> res;
+
+        stmt.reset(conn->prepareStatement(
+                       "call queryrank(?,?,?)"));
+
+        stmt->setString(1, gameid.c_str());
+        stmt->setInt(2, level);
+        stmt->setInt(3, cnt);
+
+        res.reset(stmt->executeQuery());
+
+        for (;;)
+        {
+            while (res->next()) {
+                RankItem item;
+                item.username = res->getString("username").str();
+                item.score = res->getInt("score");
+
+                items.push_back(item);
+            }
+
+            if (stmt->getMoreResults())
+            {
+                res.reset(stmt->getResultSet());
+                continue;
+            }
+            break;
+        }
+    }
+    catch (const exception& e)
+    {
+        std::stringstream ostr;
+        ostr << "[db]" << e.what();
+        throw runtime_error(ostr.str());
+    }
+
+    return items;
 }

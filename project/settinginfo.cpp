@@ -35,7 +35,9 @@ void SettingInfo::Load(string filePath)
     }
     catch (const exception& e)
     {
-        throw e;
+        std::stringstream ostr;
+        ostr << "[setting]" << e.what();
+        throw runtime_error(ostr.str());
     }
 }
 

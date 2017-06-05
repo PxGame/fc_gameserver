@@ -42,6 +42,7 @@ protected:
     void DispatchRequest(http_request message);
     void AddUser(http_request& message);
     void AddRank(http_request& message);
+    void QueryRank(http_request& message);
 
 
 };

@@ -8,6 +8,8 @@
 # include <map>
 # include <functional>
 # include <list>
+# include <string>
+# include <sstream>
 
 //cpprest
 # include <cpprest/http_listener.h>

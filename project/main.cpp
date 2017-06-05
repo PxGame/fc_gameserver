@@ -1,6 +1,7 @@
 # include "pub.h"
 # include "settinginfo.h"
 # include "webservice.h"
+# include "database.h"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ int main(int argc, char *argv[])
     }
     catch (const exception& e)
     {
-        cout << "Exception:" << e.what() << endl;
+        cout << e.what() << endl;
     }
 
     printf("Press Enter key to continue...\n");
@@ -31,4 +32,5 @@ void Init()
     settingInfo.Load("setting.json");
 
     Webservice::Create(settingInfo.web);
+    Database::Create(settingInfo.db);
 }

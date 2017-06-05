@@ -22,10 +22,13 @@ void Webservice::Create(WebSetting setting)
         m_webservice->m_htmlContentMap.clear();
         m_webservice->m_htmlContentMap[U("/adduser")] = std::bind(&Webservice::AddUser, m_webservice, std::placeholders::_1);
         m_webservice->m_htmlContentMap[U("/addrank")] = std::bind(&Webservice::AddRank, m_webservice, std::placeholders::_1);
+        m_webservice->m_htmlContentMap[U("/queryrank")] = std::bind(&Webservice::QueryRank, m_webservice, std::placeholders::_1);
     }
     catch (const exception& e)
     {
-        throw e;
+        std::stringstream ostr;
+        ostr << "[web]" << e.what();
+        throw runtime_error(ostr.str());
     }
 }
 
@@ -41,7 +44,9 @@ void Webservice::Destory()
             }
             catch (const exception& e)
             {
-                throw e;
+                std::stringstream ostr;
+                ostr << "[web]" << e.what();
+                throw runtime_error(ostr.str());
             }
 
             m_webservice->m_listener.reset();
@@ -70,7 +75,9 @@ task<void> Webservice::Start()
     }
     catch (const exception& e)
     {
-        throw e;
+        std::stringstream ostr;
+        ostr << "[web]" << e.what();
+        throw runtime_error(ostr.str());
     }
 
     return retTask;
@@ -86,7 +93,9 @@ task<void> Webservice::Stop()
     }
     catch (const exception& e)
     {
-        throw e;
+        std::stringstream ostr;
+        ostr << "[web]" << e.what();
+        throw runtime_error(ostr.str());
     }
 
     return retTask;
@@ -122,9 +131,23 @@ void Webservice::AddUser(http_request &message)
 
         json::value jsonVal = tk.get();
 
-        string_t gameid = jsonVal["gameid"].as_string();
+        string_t gameid = jsonVal[U("gameid")].as_string();
+        string_t deviceid = jsonVal[U("deviceid")].as_string();
+        string_t username = jsonVal[U("username")].as_string();
+        string_t devicetype = jsonVal[U("devicetype")].as_string();
+        string_t devicemodel = jsonVal[U("devicemodel")].as_string();
+        int auth = jsonVal[U("auth")].as_integer();
 
+        Database::GetInstance()->AddUser(
+                    gameid,
+                    deviceid,
+                    username,
+                    devicetype,
+                    devicemodel,
+                    auth
+                    );
 
+        message.reply(status_codes::OK);
     }
     catch(const exception& e)
     {
@@ -141,9 +164,65 @@ void Webservice::AddRank(http_request &message)
 
         json::value jsonVal = tk.get();
 
-        string_t gameid = jsonVal["gameid"].as_string();
+        string_t gameid = jsonVal[U("gameid")].as_string();
+        string_t deviceid = jsonVal[U("deviceid")].as_string();
+        int level = jsonVal[U("level")].as_integer();
+        int score = jsonVal[U("score")].as_integer();
+        int cleartime = jsonVal[U("cleartime")].as_integer();
+        string_t ip = jsonVal[U("ip")].as_string();
+
+        Database::GetInstance()->AddRank(
+                    gameid,
+                    deviceid,
+                    level,
+                    score,
+                    cleartime,
+                    ip
+                    );
+
+        message.reply(status_codes::OK);
+    }
+    catch(const exception& e)
+    {
+        message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+    }
+}
+
+void Webservice::QueryRank(http_request &message)
+{
+
+    try
+    {
+        task<json::value> tk = message.extract_json();
+        tk.wait();
+
+        json::value jsonVal = tk.get();
+
+        string_t gameid = jsonVal[U("gameid")].as_string();
+        int level = jsonVal[U("level")].as_integer();
+        int cnt = jsonVal[U("cnt")].as_integer();
+
+        list<RankItem> items = Database::GetInstance()->QueryRank(
+                    gameid,
+                    level,
+                    cnt
+                    );
+
+        json::value retVal;
 
 
+        int index = 0;
+        for(RankItem item : items)\
+        {
+            json::value jsItem;
+
+//            jsItem[U("username")] = item.username;
+//            jsItem[U("score")] = item.score;
+
+            retVal[index] = jsItem;
+        }
+
+        message.reply(status_codes::OK, retVal);
     }
     catch(const exception& e)
     {
