@@ -11,7 +11,7 @@ sudo apt-get install g++ git make zlib1g-dev libboost-all-dev libssl-dev cmake
 - install cpprestsdk
 
 ```
-$ sudo apt-get install libcpprest-dev
+sudo apt-get install libcpprest-dev
 ```
 
 - set project to using c++11 and include library

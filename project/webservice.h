@@ -30,7 +30,9 @@ protected:
 
     map<string_t, function<void(http_request&)>> m_htmlContentMap;
 
-    void DispatchRequest(http_request& message);
+    void DispatchRequest(http_request message);
+
+    void Test(http_request& message);
 
 public:
     task<void> Start();
