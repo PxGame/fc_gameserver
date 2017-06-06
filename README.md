@@ -24,3 +24,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 target_link_libraries(${PROJECT_NAME} pthread boost_system crypto ssl cpprest)
 ```
 
+- install QT
+
+```
+sudo apt-get install cmake qt5-default qtcreator
+```
+
