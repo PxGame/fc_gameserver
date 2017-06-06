@@ -30,3 +30,10 @@ target_link_libraries(${PROJECT_NAME} pthread boost_system crypto ssl cpprest)
 sudo apt-get install cmake qt5-default qtcreator
 ```
 
+- generic
+
+```
+cmake -std=c++11 CMakeLists.txt
+make
+```
+
