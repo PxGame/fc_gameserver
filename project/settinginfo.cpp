@@ -15,10 +15,10 @@ bool SettingInfo::Load(string filePath)
 
      value jsVal = value::parse(ifs);
 
-     m_uri = uri(jsVal["uri"].as_string());
-     m_timeout = jsVal["timeout"].as_integer();
-     m_sslKey = jsVal["sslkey"].as_string();
-     m_sslCrt = jsVal["sslcrt"].as_string();
+     Uri = uri(jsVal["uri"].as_string());
+     Timeout = jsVal["timeout"].as_integer();
+     SSLKey = jsVal["sslkey"].as_string();
+     SSLCrt = jsVal["sslcrt"].as_string();
 
      bRet = true;
     }
@@ -30,22 +30,3 @@ bool SettingInfo::Load(string filePath)
     return bRet;
 }
 
-uri SettingInfo::Uri()
-{
-    return m_uri;
-}
-
-int SettingInfo::TimeOut()
-{
-    return m_timeout;
-}
-
-string_t SettingInfo::SSLKey()
-{
-    return m_sslKey;
-}
-
-string_t SettingInfo::SSLCrt()
-{
-    return m_sslCrt;
-}

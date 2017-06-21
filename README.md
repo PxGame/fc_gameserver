@@ -30,6 +30,13 @@ target_link_libraries(${PROJECT_NAME} pthread boost_system crypto ssl cpprest)
 sudo apt-get install cmake qt5-default qtcreator
 ```
 
+- install mysql
+```
+sudo apt-get install mysql-server
+sudo apt-get install mysql-client
+sudo apt-get install libmysqlcppconn-dev 
+```
+
 - generic
 
 ```

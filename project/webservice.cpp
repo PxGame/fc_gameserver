@@ -20,9 +20,9 @@ bool Webservice::Create()
         }
 
         http_listener_config listenerConfig;
-        listenerConfig.set_timeout(utility::seconds(settingInfo.TimeOut()));
+        listenerConfig.set_timeout(utility::seconds(settingInfo.Timeout));
 
-        m_webservice->m_listener = new http_listener(settingInfo.Uri(), listenerConfig);
+        m_webservice->m_listener = new http_listener(settingInfo.Uri, listenerConfig);
 
 
         m_webservice->m_listener->support(

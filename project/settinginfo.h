@@ -16,17 +16,11 @@ public:
     SettingInfo();
     bool Load(string filePath);
 
-protected:
-    uri m_uri;
-    int m_timeout;
-    string_t m_sslKey;
-    string_t m_sslCrt;
-
 public:
-    uri Uri();
-    int TimeOut();
-    string_t SSLKey();
-    string_t SSLCrt();
+    uri Uri;
+    int Timeout;
+    string_t SSLKey;
+    string_t SSLCrt;
 };
 
 #endif // SETTINGINFO_H

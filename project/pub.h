@@ -16,5 +16,12 @@
 
 //boost
 
+//mysql
+# include <cppconn/connection.h>
+# include <cppconn/driver.h>
+# include <cppconn/statement.h>
+# include <cppconn/prepared_statement.h>
+# include <cppconn/metadata.h>
+# include <cppconn/exception.h>
 
 #endif // PUB_H
