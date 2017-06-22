@@ -42,5 +42,9 @@ sudo apt-get install libmysqlcppconn-dev
 ```
 cmake -std=c++11 CMakeLists.txt
 make
+
+//build
+-DCMAKE_BUILD_TYPE=Debug
+-DCMAKE_BUILD_TYPE=Release
 ```
 

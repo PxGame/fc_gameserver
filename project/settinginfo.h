@@ -10,6 +10,25 @@ using namespace web::json;
 using namespace concurrency::streams;
 using namespace std;
 
+struct WebSetting
+{
+    web::uri uri;
+    int timeout;
+    struct _ssl{
+        string_t key;
+        string_t crt;
+    }ssl;
+};
+
+struct DbSetting
+{
+    string_t host;
+    string_t username;
+    string_t password;
+    int connpoolsize;
+    int reconnmaxsize;
+};
+
 class SettingInfo
 {
 public:
@@ -17,10 +36,8 @@ public:
     bool Load(string filePath);
 
 public:
-    uri Uri;
-    int Timeout;
-    string_t SSLKey;
-    string_t SSLCrt;
+    WebSetting web;
+    DbSetting db;
 };
 
 #endif // SETTINGINFO_H

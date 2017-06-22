@@ -2,7 +2,7 @@
 
 # include "settinginfo.h"
 
-Webservice* Webservice::m_webservice = nullptr;
+shared_ptr<Webservice> Webservice::m_webservice = nullptr;
 
 bool Webservice::Create()
 {
@@ -11,7 +11,7 @@ bool Webservice::Create()
     {
         Destory();
 
-        m_webservice = new Webservice();
+        m_webservice = make_shared<Webservice>();
 
         SettingInfo settingInfo;
         if(!settingInfo.Load("setting.json"))
@@ -20,18 +20,17 @@ bool Webservice::Create()
         }
 
         http_listener_config listenerConfig;
-        listenerConfig.set_timeout(utility::seconds(settingInfo.Timeout));
+        listenerConfig.set_timeout(utility::seconds(settingInfo.web.timeout));
 
-        m_webservice->m_listener = new http_listener(settingInfo.Uri, listenerConfig);
-
+        m_webservice->m_listener = make_shared<http_listener>(settingInfo.web.uri, listenerConfig);
 
         m_webservice->m_listener->support(
                     bind(&Webservice::DispatchRequest, m_webservice, placeholders::_1)
                     );
 
         m_webservice->m_htmlContentMap.clear();
-        m_webservice->m_htmlContentMap[U("/test")] =
-                bind(&Webservice::Test, m_webservice, placeholders::_1);
+        m_webservice->m_htmlContentMap[U("/adduser")] = std::bind(&Webservice::AddUser, m_webservice, std::placeholders::_1);
+        m_webservice->m_htmlContentMap[U("/addrank")] = std::bind(&Webservice::AddRank, m_webservice, std::placeholders::_1);
 
         bRet = true;
     }
@@ -58,18 +57,16 @@ void Webservice::Destory()
                 throw err;
             }
 
-            delete(m_webservice->m_listener);
-            m_webservice->m_listener = nullptr;
+            m_webservice->m_listener.reset();
         }
 
-        delete(m_webservice);
-        m_webservice = nullptr;
+        m_webservice.reset();
     }
 }
 
-Webservice *Webservice::GetInstance()
+shared_ptr<Webservice> Webservice::GetInstance()
 {
-    return m_webservice;
+    return m_webservice->shared_from_this();
 }
 
 Webservice::Webservice()
@@ -79,27 +76,6 @@ Webservice::Webservice()
 
 Webservice::~Webservice()
 {
-
-}
-
-void Webservice::DispatchRequest(http_request message)
-{
-    string_t path = message.relative_uri().path();
-
-    std::map<string_t, std::function<void(http_request&)>>::iterator contextData = m_htmlContentMap.find(path);
-    if (m_htmlContentMap.end() == contextData)
-    {//没有找到
-        message.reply(status_codes::NotFound);
-        return;
-    }
-
-    //分发调用
-    contextData->second(message);
-}
-
-void Webservice::Test(http_request &message)
-{
-    message.reply(status_codes::OK, to_utf16string("噎屎拉！"));
 }
 
 task<void> Webservice::Start()
@@ -132,4 +108,51 @@ task<void> Webservice::Stop()
     }
 
     return retTask;
+}
+
+void Webservice::DispatchRequest(http_request message)
+{
+    try
+    {
+        string_t path = message.relative_uri().path();
+
+        std::map<string_t, std::function<void(http_request&)>>::iterator findIterator = m_htmlContentMap.find(path);
+        if (m_htmlContentMap.end() == findIterator)
+        {
+            message.reply(status_codes::NotFound,to_utf8string("Not found."));
+            return;
+        }
+
+        findIterator->second(message);
+    }
+    catch(const exception& e)
+    {
+        message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+    }
+}
+
+void Webservice::AddUser(http_request &message)
+{
+    web::uri targetUri = message.absolute_uri();
+    string_t targetQuery = targetUri.query();
+    string_t targetFragment = targetUri.fragment();
+
+    ucout << targetFragment << endl;
+
+    std::map<string_t, string_t> queryMap = web::uri::split_query(targetQuery);
+
+    message.reply(status_codes::OK, to_utf8string(targetFragment));
+}
+
+void Webservice::AddRank(http_request &message)
+{
+    web::uri targetUri = message.absolute_uri();
+    string_t targetQuery = targetUri.query();
+    string_t targetFragment = targetUri.fragment();
+
+    ucout << targetFragment << endl;
+
+    std::map<string_t, string_t> queryMap = web::uri::split_query(targetQuery);
+
+    message.reply(status_codes::OK, to_utf8string(targetFragment));
 }

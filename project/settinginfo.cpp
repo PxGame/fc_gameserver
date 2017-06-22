@@ -15,10 +15,24 @@ bool SettingInfo::Load(string filePath)
 
      value jsVal = value::parse(ifs);
 
-     Uri = uri(jsVal["uri"].as_string());
-     Timeout = jsVal["timeout"].as_integer();
-     SSLKey = jsVal["sslkey"].as_string();
-     SSLCrt = jsVal["sslcrt"].as_string();
+
+     // web ====================================
+     value jsWeb = jsVal["web"];
+     web.uri = uri(jsWeb["uri"].as_string());
+     web.timeout = jsWeb["timeout"].as_integer();
+
+     value jsSsl = jsWeb["ssl"];
+     web.ssl.key = jsSsl["key"].as_string();
+     web.ssl.crt = jsSsl["crt"].as_string();
+
+
+     // db =====================================
+     value jsDb = jsVal["db"];
+     db.host = jsDb["host"].as_string();
+     db.username = jsDb["username"].as_string();
+     db.password = jsDb["password"].as_string();
+     db.connpoolsize = jsDb["connpoolsize"].as_integer();
+     db.reconnmaxsize = jsDb["reconnmaxsize"].as_integer();
 
      bRet = true;
     }

@@ -1,6 +1,19 @@
 {
-"uri":"http://127.0.0.1:8080",
-"timeout":12,
-"sslkey":"",
-"sslcrt":""
+    "web":{
+        "uri":"http://127.0.0.1:8080",
+        "timeout":12,
+        "ssl":{
+            "key":"",
+            "crt":""
+        }
+    },
+
+    "db":{
+        "host":"tcp://103.79.77.95:3306/fc_gameserver",
+        "username":"admin",
+        "password":"123456",
+        "connpoolsize":100,
+        "reconnmaxsize":3
+    }
+
 }

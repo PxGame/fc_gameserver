@@ -5,8 +5,6 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    cout << "Hello World!" << endl;
-
     try {
 
         if(Webservice::Create())
@@ -18,9 +16,9 @@ int main(int argc, char *argv[])
             cout << "create error." << endl;
         }
     }
-    catch (const exception& err)
+    catch (const exception& e)
     {
-        cout << "Exception[" << __FUNCTION__ << "]:" << err.what() << endl;
+        cout << "Exception[" << __FUNCTION__ << "]:" << e.what() << endl;
     }
 
     printf("Press Enter key to continue...\n");

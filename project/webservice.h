@@ -11,32 +11,36 @@ using namespace utility::conversions;
 using namespace std;
 
 class Webservice
+        : public enable_shared_from_this<Webservice>
 {
 protected:
 
-    static Webservice* m_webservice;
+    static shared_ptr<Webservice> m_webservice;
 
 public:
 
     static bool Create();
     static void Destory();
-    static Webservice* GetInstance();
+    static shared_ptr<Webservice> GetInstance();
 
-protected:
+public:
+
     Webservice();
     ~Webservice();
 
-    http_listener* m_listener;
-
-    map<string_t, function<void(http_request&)>> m_htmlContentMap;
-
-    void DispatchRequest(http_request message);
-
-    void Test(http_request& message);
-
-public:
     task<void> Start();
     task<void> Stop();
+
+protected:
+
+    shared_ptr<http_listener> m_listener;
+
+    std::map<string_t, std::function<void(http_request&)>> m_htmlContentMap;
+
+    void DispatchRequest(http_request message);
+    void AddUser(http_request& message);
+    void AddRank(http_request& message);
+
 
 };
 
