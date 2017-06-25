@@ -7,6 +7,7 @@
 # include <memory>
 # include <map>
 # include <functional>
+# include <list>
 
 //cpprest
 # include <cpprest/http_listener.h>

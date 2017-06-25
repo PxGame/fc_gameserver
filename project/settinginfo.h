@@ -33,7 +33,7 @@ class SettingInfo
 {
 public:
     SettingInfo();
-    bool Load(string filePath);
+    void Load(string filePath);
 
 public:
     WebSetting web;

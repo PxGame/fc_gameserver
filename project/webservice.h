@@ -2,6 +2,8 @@
 #define WEBSERVICE_H
 
 # include "pub.h"
+# include "settinginfo.h"
+# include "database.h"
 
 using namespace web::http;
 using namespace web::http::experimental::listener;
@@ -19,9 +21,9 @@ protected:
 
 public:
 
-    static bool Create();
+    static void Create(WebSetting setting);
     static void Destory();
-    static shared_ptr<Webservice> GetInstance();
+    static inline shared_ptr<Webservice> GetInstance(){return m_webservice;}
 
 public:
 

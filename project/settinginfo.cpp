@@ -5,9 +5,8 @@ SettingInfo::SettingInfo()
 
 }
 
-bool SettingInfo::Load(string filePath)
+void SettingInfo::Load(string filePath)
 {
-    bool bRet= false;
     try
     {
      ifstream_t ifs;
@@ -33,14 +32,10 @@ bool SettingInfo::Load(string filePath)
      db.password = jsDb["password"].as_string();
      db.connpoolsize = jsDb["connpoolsize"].as_integer();
      db.reconnmaxsize = jsDb["reconnmaxsize"].as_integer();
-
-     bRet = true;
     }
-    catch (const exception& err)
+    catch (const exception& e)
     {
-        throw err;
+        throw e;
     }
-
-    return bRet;
 }
 

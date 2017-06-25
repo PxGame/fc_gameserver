@@ -1,28 +1,19 @@
 #include "webservice.h"
 
-# include "settinginfo.h"
-
 shared_ptr<Webservice> Webservice::m_webservice = nullptr;
 
-bool Webservice::Create()
+void Webservice::Create(WebSetting setting)
 {
-    bool bRet = false;
     try
     {
         Destory();
 
         m_webservice = make_shared<Webservice>();
 
-        SettingInfo settingInfo;
-        if(!settingInfo.Load("setting.json"))
-        {
-            throw runtime_error("setting is load failed.");
-        }
-
         http_listener_config listenerConfig;
-        listenerConfig.set_timeout(utility::seconds(settingInfo.web.timeout));
+        listenerConfig.set_timeout(utility::seconds(setting.timeout));
 
-        m_webservice->m_listener = make_shared<http_listener>(settingInfo.web.uri, listenerConfig);
+        m_webservice->m_listener = make_shared<http_listener>(setting.uri, listenerConfig);
 
         m_webservice->m_listener->support(
                     bind(&Webservice::DispatchRequest, m_webservice, placeholders::_1)
@@ -31,15 +22,11 @@ bool Webservice::Create()
         m_webservice->m_htmlContentMap.clear();
         m_webservice->m_htmlContentMap[U("/adduser")] = std::bind(&Webservice::AddUser, m_webservice, std::placeholders::_1);
         m_webservice->m_htmlContentMap[U("/addrank")] = std::bind(&Webservice::AddRank, m_webservice, std::placeholders::_1);
-
-        bRet = true;
     }
-    catch (const exception& err)
+    catch (const exception& e)
     {
-        throw err;
+        throw e;
     }
-
-    return bRet;
 }
 
 void Webservice::Destory()
@@ -52,9 +39,9 @@ void Webservice::Destory()
             {
                 m_webservice->m_listener->close().wait();
             }
-            catch (const exception& err)
+            catch (const exception& e)
             {
-                throw err;
+                throw e;
             }
 
             m_webservice->m_listener.reset();
@@ -62,11 +49,6 @@ void Webservice::Destory()
 
         m_webservice.reset();
     }
-}
-
-shared_ptr<Webservice> Webservice::GetInstance()
-{
-    return m_webservice->shared_from_this();
 }
 
 Webservice::Webservice()
@@ -86,9 +68,9 @@ task<void> Webservice::Start()
     {
         retTask = m_listener->open();
     }
-    catch (const exception& err)
+    catch (const exception& e)
     {
-        throw err;
+        throw e;
     }
 
     return retTask;
@@ -102,9 +84,9 @@ task<void> Webservice::Stop()
     {
         retTask = m_listener->close();
     }
-    catch (const exception& err)
+    catch (const exception& e)
     {
-        throw err;
+        throw e;
     }
 
     return retTask;
@@ -133,26 +115,38 @@ void Webservice::DispatchRequest(http_request message)
 
 void Webservice::AddUser(http_request &message)
 {
-    web::uri targetUri = message.absolute_uri();
-    string_t targetQuery = targetUri.query();
-    string_t targetFragment = targetUri.fragment();
+    try
+    {
+        task<json::value> tk = message.extract_json();
+        tk.wait();
 
-    ucout << targetFragment << endl;
+        json::value jsonVal = tk.get();
 
-    std::map<string_t, string_t> queryMap = web::uri::split_query(targetQuery);
+        string_t gameid = jsonVal["gameid"].as_string();
 
-    message.reply(status_codes::OK, to_utf8string(targetFragment));
+
+    }
+    catch(const exception& e)
+    {
+        message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+    }
 }
 
 void Webservice::AddRank(http_request &message)
 {
-    web::uri targetUri = message.absolute_uri();
-    string_t targetQuery = targetUri.query();
-    string_t targetFragment = targetUri.fragment();
+    try
+    {
+        task<json::value> tk = message.extract_json();
+        tk.wait();
 
-    ucout << targetFragment << endl;
+        json::value jsonVal = tk.get();
 
-    std::map<string_t, string_t> queryMap = web::uri::split_query(targetQuery);
+        string_t gameid = jsonVal["gameid"].as_string();
 
-    message.reply(status_codes::OK, to_utf8string(targetFragment));
+
+    }
+    catch(const exception& e)
+    {
+        message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+    }
 }
