@@ -147,11 +147,11 @@ void Database::DestoryAll()
 {
     unique_lock<std::mutex> lck(m_mtPool);
 
-    for(Connection* conn : m_disableConn)
+    for(Connection*& conn : m_disableConn)
     {
         Destory(conn);
     }
-    for(Connection* conn : m_enableConn)
+    for(Connection*& conn : m_enableConn)
     {
         Destory(conn);
     }
@@ -282,7 +282,7 @@ list<RankItem> Database::QueryRank(string gameid, int level, int cnt)
         {
             while (res->next()) {
                 RankItem item;
-                item.username = res->getString("username").str();
+                item.username = res->getString("username").asStdString();
                 item.score = res->getInt("score");
 
                 items.push_back(item);
