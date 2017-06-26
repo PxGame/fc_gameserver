@@ -223,10 +223,10 @@ void Database::AddRank(string gameid, string deviceid, int level, int score, int
 
         stmt->setString(1, gameid.c_str());
         stmt->setString(2, deviceid.c_str());
-        stmt->setInt(3, level);
-        stmt->setInt(4, score);
-        stmt->setInt(5, cleartime);
-        stmt->setString(6, ip.c_str());
+        stmt->setString(3, ip.c_str());
+        stmt->setInt(4, level);
+        stmt->setInt(5, score);
+        stmt->setInt(6, cleartime);
 
         res.reset(stmt->executeQuery());
 

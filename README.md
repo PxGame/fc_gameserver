@@ -40,7 +40,7 @@ sudo apt-get install libmysqlcppconn-dev
 - generic
 
 ```
-cmake -std=c++11 CMakeLists.txt
+cmake -std=c++11 -DCMAKE_BUILD_TYPE=Release CMakeLists.txt
 make
 
 //build

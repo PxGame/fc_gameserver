@@ -12,17 +12,18 @@ int main(int argc, char *argv[])
     try
     {
         Init();
+        cout << "Init Success." << endl;
 
         Webservice::GetInstance()->Start().wait();
+
+        while(true){sleep(30);}
     }
     catch (const exception& e)
     {
         cout << e.what() << endl;
     }
 
-    printf("Press Enter key to continue...\n");
-    fgetc(stdin);
-
+    cout << "Application quit." << endl;
     return 0;
 }
 
