@@ -224,7 +224,7 @@ void Webservice::QueryRank(http_request &message)
         json::value rootVal;
 
         int index = 0;
-        for(RankItem& item : items)\
+        for(RankItem& item : items)
         {
             json::value jsItem;
 
