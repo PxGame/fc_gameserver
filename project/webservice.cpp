@@ -105,6 +105,12 @@ void Webservice::DispatchRequest(http_request message)
 {
     try
     {
+        if(0 != message.method().compare(U("POST")))
+        {
+            message.reply(status_codes::MethodNotAllowed,to_utf8string("Method Not Allowed."));
+            return;
+        }
+
         string_t path = message.relative_uri().path();
 
         std::map<string_t, std::function<void(http_request&)>>::iterator findIterator = m_htmlContentMap.find(path);
@@ -130,6 +136,8 @@ void Webservice::AddUser(http_request &message)
         tk.wait();
 
         json::value jsonVal = tk.get();
+
+        ucout << U("AddUser:") << jsonVal.serialize().c_str() << endl;
 
         string_t gameid = jsonVal[U("gameid")].as_string();
         string_t deviceid = jsonVal[U("deviceid")].as_string();
@@ -164,12 +172,14 @@ void Webservice::AddRank(http_request &message)
 
         json::value jsonVal = tk.get();
 
+        ucout << U("AddRank:") << jsonVal.serialize().c_str() << endl;
+
         string_t gameid = jsonVal[U("gameid")].as_string();
         string_t deviceid = jsonVal[U("deviceid")].as_string();
         int level = jsonVal[U("level")].as_integer();
         int score = jsonVal[U("score")].as_integer();
         int cleartime = jsonVal[U("cleartime")].as_integer();
-        string_t ip = jsonVal[U("ip")].as_string();
+        string_t ip = "";
 
         Database::GetInstance()->AddRank(
                     gameid,
@@ -180,7 +190,7 @@ void Webservice::AddRank(http_request &message)
                     ip
                     );
 
-        message.reply(status_codes::OK);
+        message.reply(status_codes::OK,message.to_string());
     }
     catch(const exception& e)
     {
@@ -197,6 +207,8 @@ void Webservice::QueryRank(http_request &message)
         tk.wait();
 
         json::value jsonVal = tk.get();
+
+        ucout << U("QueryRank:") << jsonVal.serialize().c_str() << endl;
 
         string_t gameid = jsonVal[U("gameid")].as_string();
         int level = jsonVal[U("level")].as_integer();
