@@ -221,7 +221,7 @@ void Webservice::QueryRank(http_request &message)
                     );
 
         json::value retVal;
-
+        json::value rootVal;
 
         int index = 0;
         for(RankItem& item : items)\
@@ -231,9 +231,11 @@ void Webservice::QueryRank(http_request &message)
             jsItem[U("username")] = json::value(to_string_t(item.username));
             jsItem[U("score")] = json::value(item.score);
 
-            retVal[index] = jsItem;
+            rootVal[index] = jsItem;
             index++;
         }
+
+        retVal[U("ranks")] = rootVal;
 
         message.reply(status_codes::OK, retVal);
     }
