@@ -15,16 +15,25 @@ struct WebSetting
     web::uri uri;
     int timeout;
     struct _ssl{
-        string_t key;
-        string_t crt;
+        string key;
+        string crt;
+
+        boost::asio::const_buffer KeyBuffer()
+        {
+            return boost::asio::const_buffer(key.c_str(), key.size());
+        }
+        boost::asio::const_buffer CrtBuffer()
+        {
+            return boost::asio::const_buffer(crt.c_str(), crt.size());
+        }
     }ssl;
 };
 
 struct DbSetting
 {
-    string_t host;
-    string_t username;
-    string_t password;
+    string host;
+    string username;
+    string password;
     int connpoolsize;
     int reconnmaxsize;
 };

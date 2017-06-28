@@ -13,6 +13,14 @@ void Webservice::Create(WebSetting setting)
         http_listener_config listenerConfig;
         listenerConfig.set_timeout(utility::seconds(setting.timeout));
 
+        //ssl support
+        if(!setting.ssl.crt.empty() && !setting.ssl.key.empty())
+        {
+            m_webservice->m_cert = setting.ssl.CrtBuffer();
+            m_webservice->m_key = setting.ssl.KeyBuffer();
+            listenerConfig.set_ssl_context_callback(std::bind(&Webservice::SslContentCallback, m_webservice, std::placeholders::_1));
+        }
+
         m_webservice->m_listener = make_shared<http_listener>(setting.uri, listenerConfig);
 
         m_webservice->m_listener->support(
@@ -24,6 +32,7 @@ void Webservice::Create(WebSetting setting)
         m_webservice->m_htmlContentMap[U("/queryuser")] = std::bind(&Webservice::QueryUser, m_webservice, std::placeholders::_1);
         m_webservice->m_htmlContentMap[U("/addrank")] = std::bind(&Webservice::AddRank, m_webservice, std::placeholders::_1);
         m_webservice->m_htmlContentMap[U("/queryrank")] = std::bind(&Webservice::QueryRank, m_webservice, std::placeholders::_1);
+        m_webservice->m_htmlContentMap[U("/deleteuser")] = std::bind(&Webservice::DeleteUser, m_webservice, std::placeholders::_1);
     }
     catch (const exception& e)
     {
@@ -59,7 +68,6 @@ void Webservice::Destory()
 
 Webservice::Webservice()
 {
-
 }
 
 Webservice::~Webservice()
@@ -100,6 +108,13 @@ task<void> Webservice::Stop()
     }
 
     return retTask;
+}
+
+void Webservice::SslContentCallback(boost::asio::ssl::context &context)
+{
+    context.set_options(boost::asio::ssl::context::default_workarounds);
+    context.use_certificate_chain(m_cert);
+    context.use_private_key(m_key, boost::asio::ssl::context::pem);
 }
 
 void Webservice::DispatchRequest(http_request message)
@@ -195,6 +210,34 @@ void Webservice::QueryUser(http_request &message)
         retVal[U("info")] = rootVal;
 
         message.reply(status_codes::OK, retVal);
+    }
+    catch(const exception& e)
+    {
+        message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+    }
+}
+
+void Webservice::DeleteUser(http_request &message)
+{
+
+    try
+    {
+        task<json::value> tk = message.extract_json();
+        tk.wait();
+
+        json::value jsonVal = tk.get();
+
+        ucout << U("DeleteUser:") << jsonVal.serialize().c_str() << endl;
+
+        string_t gameid = jsonVal[U("gameid")].as_string();
+        string_t deviceid = jsonVal[U("deviceid")].as_string();
+
+        Database::GetInstance()->DeleteUser(
+                    gameid,
+                    deviceid
+                    );
+
+        message.reply(status_codes::OK);
     }
     catch(const exception& e)
     {

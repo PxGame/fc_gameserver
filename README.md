@@ -48,3 +48,13 @@ make
 -DCMAKE_BUILD_TYPE=Release
 ```
 
+- ssl
+
+```
+openssl genrsa -aes256 -out ca.key 1024
+//pass phrase for ca.key:a19940318
+
+openssl req -new -x509 -key ca.key -out ca.crt
+
+```
+

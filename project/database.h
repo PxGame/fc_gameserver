@@ -64,6 +64,8 @@ public:
     void AddUser(string gameid, string deviceid, string username, string devicetype, string devicemodel, int auth);
     shared_ptr<UserItem> QueryUser(string gameid, string deviceid);
 
+    void DeleteUser(string gameid, string deviceid);
+
     void AddRank(string gameid, string deviceid, int level, int score, int cleartime, string ip);
     shared_ptr<list<shared_ptr<RankItem>>> QueryRank(string gameid, int level, int cnt);
 };

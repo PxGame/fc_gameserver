@@ -34,15 +34,19 @@ public:
     task<void> Stop();
 
 protected:
+    boost::asio::const_buffer m_cert;
+    boost::asio::const_buffer m_key;
 
     shared_ptr<http_listener> m_listener;
 
     std::map<string_t, std::function<void(http_request&)>> m_htmlContentMap;
 
+    void SslContentCallback(boost::asio::ssl::context& context);
     void DispatchRequest(http_request message);
 
     void AddUser(http_request& message);
     void QueryUser(http_request& message);
+    void DeleteUser(http_request& message);
     void AddRank(http_request& message);
     void QueryRank(http_request& message);
 

@@ -263,6 +263,53 @@ shared_ptr<UserItem> Database::QueryUser(string gameid, string deviceid)
     return item;
 }
 
+void Database::DeleteUser(string gameid, string deviceid)
+{
+
+    try
+    {
+        shared_ptr<Connection> conn(Get(), [this](Connection* ptr){Release(ptr);});
+
+        shared_ptr<PreparedStatement> stmt;
+        shared_ptr<ResultSet> res;
+
+        stmt.reset(conn->prepareStatement(
+                       "call deleteuser(?,?)"));
+
+        stmt->setString(1, gameid.c_str());
+        stmt->setString(2, deviceid.c_str());
+
+        res.reset(stmt->executeQuery());
+
+        for (;;)
+        {
+            while (res->next()) {
+                int errcode = res->getInt("errcode");
+                if (errcode != 0)
+                {
+                    std::stringstream ostr;
+                    ostr << "call deleteuser error code : " << errcode;
+                    throw runtime_error(ostr.str());
+                }
+                return;
+            }
+
+            if (stmt->getMoreResults())
+            {
+                res.reset(stmt->getResultSet());
+                continue;
+            }
+            break;
+        }
+    }
+    catch (const exception& e)
+    {
+        std::stringstream ostr;
+        ostr << "[db]" << e.what();
+        throw runtime_error(ostr.str());
+    }
+}
+
 void Database::AddRank(string gameid, string deviceid, int level, int score, int cleartime, string ip)
 {
     try
