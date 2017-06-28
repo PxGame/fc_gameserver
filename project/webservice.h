@@ -40,7 +40,9 @@ protected:
     std::map<string_t, std::function<void(http_request&)>> m_htmlContentMap;
 
     void DispatchRequest(http_request message);
+
     void AddUser(http_request& message);
+    void QueryUser(http_request& message);
     void AddRank(http_request& message);
     void QueryRank(http_request& message);
 

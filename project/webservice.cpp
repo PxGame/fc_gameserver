@@ -21,6 +21,7 @@ void Webservice::Create(WebSetting setting)
 
         m_webservice->m_htmlContentMap.clear();
         m_webservice->m_htmlContentMap[U("/adduser")] = std::bind(&Webservice::AddUser, m_webservice, std::placeholders::_1);
+        m_webservice->m_htmlContentMap[U("/queryuser")] = std::bind(&Webservice::QueryUser, m_webservice, std::placeholders::_1);
         m_webservice->m_htmlContentMap[U("/addrank")] = std::bind(&Webservice::AddRank, m_webservice, std::placeholders::_1);
         m_webservice->m_htmlContentMap[U("/queryrank")] = std::bind(&Webservice::QueryRank, m_webservice, std::placeholders::_1);
     }
@@ -163,6 +164,41 @@ void Webservice::AddUser(http_request &message)
     }
 }
 
+void Webservice::QueryUser(http_request &message)
+{
+    try
+    {
+        task<json::value> tk = message.extract_json();
+        tk.wait();
+
+        json::value jsonVal = tk.get();
+
+        ucout << U("QueryUser:") << jsonVal.serialize().c_str() << endl;
+
+        string_t gameid = jsonVal[U("gameid")].as_string();
+        string_t deviceid = jsonVal[U("deviceid")].as_string();
+
+        shared_ptr<UserItem> item = Database::GetInstance()->QueryUser(
+                    gameid,
+                    deviceid
+                    );
+
+        json::value retVal;
+        json::value rootVal;
+
+        rootVal[U("username")] = json::value(to_string_t(item->username));
+        rootVal[U("auth")] = json::value(item->auth);
+
+        retVal[U("info")] = rootVal;
+
+        message.reply(status_codes::OK, retVal);
+    }
+    catch(const exception& e)
+    {
+        message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+    }
+}
+
 void Webservice::AddRank(http_request &message)
 {
     try
@@ -214,7 +250,7 @@ void Webservice::QueryRank(http_request &message)
         int level = jsonVal[U("level")].as_integer();
         int cnt = jsonVal[U("cnt")].as_integer();
 
-        list<RankItem> items = Database::GetInstance()->QueryRank(
+        shared_ptr<list<shared_ptr<RankItem>>> items = Database::GetInstance()->QueryRank(
                     gameid,
                     level,
                     cnt
@@ -224,12 +260,12 @@ void Webservice::QueryRank(http_request &message)
         json::value rootVal;
 
         int index = 0;
-        for(RankItem& item : items)
+        for(shared_ptr<RankItem>& item : *items)
         {
             json::value jsItem;
 
-            jsItem[U("username")] = json::value(to_string_t(item.username));
-            jsItem[U("score")] = json::value(item.score);
+            jsItem[U("username")] = json::value(to_string_t(item->username));
+            jsItem[U("score")] = json::value(item->score);
 
             rootVal[index] = jsItem;
             index++;

@@ -209,6 +209,49 @@ void Database::AddUser(string gameid, string deviceid, string username, string d
     }
 }
 
+shared_ptr<UserItem> Database::QueryUser(string gameid, string deviceid)
+{
+    shared_ptr<UserItem> item = nullptr;
+    try
+    {
+        shared_ptr<Connection> conn(Get(), [this](Connection* ptr){Release(ptr);});
+
+        shared_ptr<PreparedStatement> stmt;
+        shared_ptr<ResultSet> res;
+
+        stmt.reset(conn->prepareStatement(
+                       "call queryuser(?,?)"));
+
+        stmt->setString(1, gameid.c_str());
+        stmt->setString(2, deviceid.c_str());
+
+        res.reset(stmt->executeQuery());
+
+        for (;;)
+        {
+            while (res->next()) {
+                item->username = res->getString("username").asStdString();
+                item->auth = res->getInt("auth");
+            }
+
+            if (stmt->getMoreResults())
+            {
+                res.reset(stmt->getResultSet());
+                continue;
+            }
+            break;
+        }
+    }
+    catch (const exception& e)
+    {
+        std::stringstream ostr;
+        ostr << "[db]" << e.what();
+        throw runtime_error(ostr.str());
+    }
+
+    return item;
+}
+
 void Database::AddRank(string gameid, string deviceid, int level, int score, int cleartime, string ip)
 {
     try
@@ -259,9 +302,9 @@ void Database::AddRank(string gameid, string deviceid, int level, int score, int
     }
 }
 
-list<RankItem> Database::QueryRank(string gameid, int level, int cnt)
+shared_ptr<list<shared_ptr<RankItem>>> Database::QueryRank(string gameid, int level, int cnt)
 {
-    list<RankItem> items;
+    shared_ptr<list<shared_ptr<RankItem>>> items = make_shared<list<shared_ptr<RankItem>>>();
     try
     {
         shared_ptr<Connection> conn(Get(), [this](Connection* ptr){Release(ptr);});
@@ -281,11 +324,12 @@ list<RankItem> Database::QueryRank(string gameid, int level, int cnt)
         for (;;)
         {
             while (res->next()) {
-                RankItem item;
-                item.username = res->getString("username").asStdString();
-                item.score = res->getInt("score");
+                shared_ptr<RankItem> item = make_shared<RankItem>();
 
-                items.push_back(item);
+                item->username = res->getString("username").asStdString();
+                item->score = res->getInt("score");
+
+                items->push_back(item);
             }
 
             if (stmt->getMoreResults())

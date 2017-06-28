@@ -8,9 +8,17 @@ using namespace std;
 using namespace sql;
 
 struct RankItem
+        : public enable_shared_from_this<RankItem>
 {
     string username;
     int score;
+};
+
+struct UserItem
+        : public enable_shared_from_this<UserItem>
+{
+    string username;
+    int auth;
 };
 
 class Database
@@ -54,8 +62,10 @@ private:
 
 public:
     void AddUser(string gameid, string deviceid, string username, string devicetype, string devicemodel, int auth);
+    shared_ptr<UserItem> QueryUser(string gameid, string deviceid);
+
     void AddRank(string gameid, string deviceid, int level, int score, int cleartime, string ip);
-    list<RankItem> QueryRank(string gameid, int level, int cnt);
+    shared_ptr<list<shared_ptr<RankItem>>> QueryRank(string gameid, int level, int cnt);
 };
 
 #endif // DATABASE_H
