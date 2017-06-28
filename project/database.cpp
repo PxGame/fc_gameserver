@@ -227,9 +227,20 @@ shared_ptr<UserItem> Database::QueryUser(string gameid, string deviceid)
 
         res.reset(stmt->executeQuery());
 
+        if(res->rowsCount() > 1)
+        {
+            std::stringstream ostr;
+            ostr << "query user [" << gameid.c_str() << "][" << deviceid.c_str() << "] is multi from user table." << endl;
+            throw runtime_error(ostr.str());
+        }
+
         for (;;)
         {
             while (res->next()) {
+                if(nullptr == item)
+                {
+                    item = make_shared<UserItem>();
+                }
                 item->username = res->getString("username").asStdString();
                 item->auth = res->getInt("auth");
             }
