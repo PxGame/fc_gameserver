@@ -186,8 +186,11 @@ void Webservice::QueryUser(http_request &message)
         json::value retVal;
         json::value rootVal;
 
-        rootVal[U("username")] = json::value(to_string_t(item->username));
-        rootVal[U("auth")] = json::value(item->auth);
+        if(nullptr != item)
+        {
+            rootVal[U("username")] = json::value(to_string_t(item->username));
+            rootVal[U("auth")] = json::value(item->auth);
+        }
 
         retVal[U("info")] = rootVal;
 
