@@ -17,6 +17,7 @@ struct WebSetting
     struct _ssl{
         string key;
         string crt;
+        bool use;
 
         boost::asio::const_buffer KeyBuffer()
         {

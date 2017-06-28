@@ -14,8 +14,9 @@ void Webservice::Create(WebSetting setting)
         listenerConfig.set_timeout(utility::seconds(setting.timeout));
 
         //ssl support
-        if(!setting.ssl.crt.empty() && !setting.ssl.key.empty())
+        if(setting.ssl.use)
         {
+            cout << "Using SSL." << endl;
             m_webservice->m_cert = setting.ssl.CrtBuffer();
             m_webservice->m_key = setting.ssl.KeyBuffer();
             listenerConfig.set_ssl_context_callback(std::bind(&Webservice::SslContentCallback, m_webservice, std::placeholders::_1));
@@ -24,6 +25,7 @@ void Webservice::Create(WebSetting setting)
         m_webservice->m_listener = make_shared<http_listener>(setting.uri, listenerConfig);
 
         m_webservice->m_listener->support(
+                    methods::POST,
                     bind(&Webservice::DispatchRequest, m_webservice, placeholders::_1)
                     );
 
@@ -121,12 +123,6 @@ void Webservice::DispatchRequest(http_request message)
 {
     try
     {
-        if(0 != message.method().compare(U("POST")))
-        {
-            message.reply(status_codes::MethodNotAllowed,to_utf8string("Method Not Allowed."));
-            return;
-        }
-
         string_t path = message.relative_uri().path();
 
         std::map<string_t, std::function<void(http_request&)>>::iterator findIterator = m_htmlContentMap.find(path);

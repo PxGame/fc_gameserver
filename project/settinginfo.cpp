@@ -20,9 +20,13 @@ void SettingInfo::Load(string filePath)
      web.uri = uri(jsWeb["uri"].as_string());
      web.timeout = jsWeb["timeout"].as_integer();
 
-     value jsSsl = jsWeb["ssl"];
-     web.ssl.key = jsSsl["key"].as_string();
-     web.ssl.crt = jsSsl["crt"].as_string();
+     web.ssl.use = jsWeb.has_field(("ssl"));
+     if(web.ssl.use)
+     {
+         value jsSsl = jsWeb["ssl"];
+         web.ssl.key = jsSsl["key"].as_string();
+         web.ssl.crt = jsSsl["crt"].as_string();
+     }
 
 
      // db =====================================
