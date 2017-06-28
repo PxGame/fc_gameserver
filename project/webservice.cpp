@@ -268,7 +268,7 @@ void Webservice::AddRank(http_request &message)
                     ip
                     );
 
-        message.reply(status_codes::OK,message.to_string());
+        message.reply(status_codes::OK);
     }
     catch(const exception& e)
     {
