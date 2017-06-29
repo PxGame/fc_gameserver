@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     }
     catch (const exception& e)
     {
-        cout << e.what() << endl;
+        cout << "[main exception]" << e.what() << endl;
     }
 
     cout << "Application quit." << endl;
