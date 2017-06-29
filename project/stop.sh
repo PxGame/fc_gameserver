@@ -1,1 +1,1 @@
-kill ./gameserver
+killall ./gameserver
