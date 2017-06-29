@@ -6,6 +6,7 @@
 
 ```
 sudo apt-get install g++ git make zlib1g-dev libboost-all-dev libssl-dev cmake
+sudo apt-get install libspdlog-dev
 ```
 
 - install cpprestsdk

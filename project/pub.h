@@ -18,6 +18,7 @@
 # include <cpprest/filestream.h>
 
 //boost
+# include <boost/filesystem.hpp>
 
 //mysql
 # include <cppconn/connection.h>
@@ -26,5 +27,8 @@
 # include <cppconn/prepared_statement.h>
 # include <cppconn/metadata.h>
 # include <cppconn/exception.h>
+
+//log
+# include "log.h"
 
 #endif // PUB_H

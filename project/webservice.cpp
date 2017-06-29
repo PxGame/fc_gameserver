@@ -14,9 +14,10 @@ void Webservice::Create(WebSetting setting)
         listenerConfig.set_timeout(utility::seconds(setting.timeout));
 
         //ssl support
+
+        Log::Main()->info("Using SSL[{0}].", setting.ssl.use);
         if(setting.ssl.use)
         {
-            cout << "Using SSL." << endl;
             m_webservice->m_cert = setting.ssl.CrtBuffer();
             m_webservice->m_key = setting.ssl.KeyBuffer();
             listenerConfig.set_ssl_context_callback(std::bind(&Webservice::SslContentCallback, m_webservice, std::placeholders::_1));
@@ -137,6 +138,7 @@ void Webservice::DispatchRequest(http_request message)
     catch(const exception& e)
     {
         message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+        Log::Main()->error(e.what());
     }
 }
 
@@ -149,7 +151,7 @@ void Webservice::AddUser(http_request &message)
 
         json::value jsonVal = tk.get();
 
-        ucout << U("AddUser:") << jsonVal.serialize().c_str() << endl;
+        Log::Main()->info("AddUser:{0}.", jsonVal.serialize());
 
         string_t gameid = jsonVal[U("gameid")].as_string();
         string_t deviceid = jsonVal[U("deviceid")].as_string();
@@ -172,6 +174,7 @@ void Webservice::AddUser(http_request &message)
     catch(const exception& e)
     {
         message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+        Log::Main()->error(e.what());
     }
 }
 
@@ -184,7 +187,7 @@ void Webservice::QueryUser(http_request &message)
 
         json::value jsonVal = tk.get();
 
-        ucout << U("QueryUser:") << jsonVal.serialize().c_str() << endl;
+        Log::Main()->info("QueryUser:{0}.", jsonVal.serialize());
 
         string_t gameid = jsonVal[U("gameid")].as_string();
         string_t deviceid = jsonVal[U("deviceid")].as_string();
@@ -210,6 +213,7 @@ void Webservice::QueryUser(http_request &message)
     catch(const exception& e)
     {
         message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+        Log::Main()->error(e.what());
     }
 }
 
@@ -223,7 +227,7 @@ void Webservice::DeleteUser(http_request &message)
 
         json::value jsonVal = tk.get();
 
-        ucout << U("DeleteUser:") << jsonVal.serialize().c_str() << endl;
+        Log::Main()->info("DeleteUser:{0}.", jsonVal.serialize());
 
         string_t gameid = jsonVal[U("gameid")].as_string();
         string_t deviceid = jsonVal[U("deviceid")].as_string();
@@ -238,6 +242,7 @@ void Webservice::DeleteUser(http_request &message)
     catch(const exception& e)
     {
         message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+        Log::Main()->error(e.what());
     }
 }
 
@@ -250,7 +255,7 @@ void Webservice::AddRank(http_request &message)
 
         json::value jsonVal = tk.get();
 
-        ucout << U("AddRank:") << jsonVal.serialize().c_str() << endl;
+        Log::Main()->info("AddRank:{0}.", jsonVal.serialize());
 
         string_t gameid = jsonVal[U("gameid")].as_string();
         string_t deviceid = jsonVal[U("deviceid")].as_string();
@@ -273,6 +278,7 @@ void Webservice::AddRank(http_request &message)
     catch(const exception& e)
     {
         message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+        Log::Main()->error(e.what());
     }
 }
 
@@ -286,7 +292,7 @@ void Webservice::QueryRank(http_request &message)
 
         json::value jsonVal = tk.get();
 
-        ucout << U("QueryRank:") << jsonVal.serialize().c_str() << endl;
+        Log::Main()->info("QueryRank:{0}.", jsonVal.serialize());
 
         string_t gameid = jsonVal[U("gameid")].as_string();
         int level = jsonVal[U("level")].as_integer();
@@ -320,5 +326,6 @@ void Webservice::QueryRank(http_request &message)
     catch(const exception& e)
     {
         message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+        Log::Main()->error(e.what());
     }
 }
