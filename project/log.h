@@ -2,11 +2,9 @@
 #define LOG_H
 
 # include <spdlog/spdlog.h>
-# include <boost/filesystem.hpp>
 
 using namespace std;
 using namespace spdlog;
-using namespace boost::filesystem;
 
 class Log
         : public enable_shared_from_this<Log>

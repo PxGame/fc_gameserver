@@ -15,12 +15,6 @@ Log::Log()
 
 void Log::_Create()
 {
-    //校验路径
-    if (!exists("./log"))
-    {//创建路径
-        create_directories("./log");
-    }
-
     spdlog::set_pattern("[%D %T.%e][%l]%v");
 
     m_main = spdlog::rotating_logger_mt("main", "./log/log", 1024 * 1024 * 5, 1024);

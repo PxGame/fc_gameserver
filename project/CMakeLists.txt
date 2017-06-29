@@ -4,5 +4,5 @@ project(gameserver)
 cmake_minimum_required(VERSION 2.8)
 aux_source_directory(. SRC_LIST)
 add_executable(${PROJECT_NAME} ${SRC_LIST})
-target_link_libraries(${PROJECT_NAME} pthread boost_system boost_filesystem crypto ssl cpprest mysqlcppconn)
+target_link_libraries(${PROJECT_NAME} pthread boost_system crypto ssl cpprest mysqlcppconn)
 
