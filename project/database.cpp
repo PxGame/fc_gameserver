@@ -180,6 +180,12 @@ void Database::AddUser(string gameid, string deviceid, string username, string d
 
         res.reset(stmt->executeQuery());
 
+
+        if (1 < res->rowsCount())
+        {
+            throw new runtime_error("call adduser result is more than 1.");
+        }
+
         for (;;)
         {
             while (res->next()) {
@@ -227,11 +233,9 @@ shared_ptr<UserItem> Database::QueryUser(string gameid, string deviceid)
 
         res.reset(stmt->executeQuery());
 
-        if(res->rowsCount() > 1)
+        if (1 < res->rowsCount())
         {
-            std::stringstream ostr;
-            ostr << "query user [" << gameid.c_str() << "][" << deviceid.c_str() << "] is multi from user table." << endl;
-            throw runtime_error(ostr.str());
+            throw new runtime_error("call QueryUser result is more than 1.");
         }
 
         for (;;)
@@ -280,6 +284,11 @@ void Database::DeleteUser(string gameid, string deviceid)
         stmt->setString(2, deviceid.c_str());
 
         res.reset(stmt->executeQuery());
+
+        if (1 < res->rowsCount())
+        {
+            throw new runtime_error("call deleteuser result is more than 1.");
+        }
 
         for (;;)
         {
@@ -331,6 +340,11 @@ void Database::AddRank(string gameid, string deviceid, int level, int score, int
 
         res.reset(stmt->executeQuery());
 
+        if (1 < res->rowsCount())
+        {
+            throw new runtime_error("call addrank result is more than 1.");
+        }
+
         for (;;)
         {
             while (res->next()) {
@@ -358,6 +372,71 @@ void Database::AddRank(string gameid, string deviceid, int level, int score, int
         ostr << "[db]" << e.what();
         throw runtime_error(ostr.str());
     }
+}
+
+shared_ptr<RankNumber> Database::AddRankEx(string gameid, string deviceid, int level, int score, int cleartime, string ip)
+{
+    shared_ptr<RankNumber> rankNum;
+    try
+    {
+        shared_ptr<Connection> conn(Get(), [this](Connection* ptr){Release(ptr);});
+
+        shared_ptr<PreparedStatement> stmt;
+        shared_ptr<ResultSet> res;
+
+        stmt.reset(conn->prepareStatement(
+                       "call addrankex(?,?,?,?,?,?)"));
+
+        stmt->setString(1, gameid.c_str());
+        stmt->setString(2, deviceid.c_str());
+        stmt->setString(3, ip.c_str());
+        stmt->setInt(4, level);
+        stmt->setInt(5, score);
+        stmt->setInt(6, cleartime);
+
+        res.reset(stmt->executeQuery());
+
+        if (1 < res->rowsCount())
+        {
+            throw new runtime_error("call addrankex result is more than 1.");
+        }
+
+        for (;;)
+        {
+            while (res->next()) {
+
+                if (0 != res->findColumn("errcode"))
+                {
+                    int errcode = res->getInt("errcode");
+                    std::stringstream ostr;
+                    ostr << "call addrankex error code : " << errcode;
+                    throw runtime_error(ostr.str());
+                }
+
+                int current = res->getInt("current");
+                int good = res->getInt("best");
+
+                rankNum = make_shared<RankNumber>();
+                rankNum->current = current;
+                rankNum->best = good;
+            }
+
+            if (stmt->getMoreResults())
+            {
+                res.reset(stmt->getResultSet());
+                continue;
+            }
+            break;
+        }
+    }
+    catch (const exception& e)
+    {
+        std::stringstream ostr;
+        ostr << "[db]" << e.what();
+        throw runtime_error(ostr.str());
+    }
+
+    return rankNum;
 }
 
 shared_ptr<list<shared_ptr<RankItem>>> Database::QueryRank(string gameid, int level, int cnt)

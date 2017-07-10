@@ -48,6 +48,7 @@ protected:
     void QueryUser(http_request& message);
     void DeleteUser(http_request& message);
     void AddRank(http_request& message);
+    void AddRankEx(http_request& message);
     void QueryRank(http_request& message);
 
 

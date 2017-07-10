@@ -14,6 +14,13 @@ struct RankItem
     int score;
 };
 
+struct RankNumber
+        : public enable_shared_from_this<RankItem>
+{
+    int current;
+    int best;
+};
+
 struct UserItem
         : public enable_shared_from_this<UserItem>
 {
@@ -67,6 +74,7 @@ public:
     void DeleteUser(string gameid, string deviceid);
 
     void AddRank(string gameid, string deviceid, int level, int score, int cleartime, string ip);
+    shared_ptr<RankNumber> AddRankEx(string gameid, string deviceid, int level, int score, int cleartime, string ip);
     shared_ptr<list<shared_ptr<RankItem>>> QueryRank(string gameid, int level, int cnt);
 };
 

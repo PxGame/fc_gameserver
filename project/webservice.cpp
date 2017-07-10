@@ -34,6 +34,7 @@ void Webservice::Create(WebSetting setting)
         m_webservice->m_htmlContentMap[U("/adduser")] = std::bind(&Webservice::AddUser, m_webservice, std::placeholders::_1);
         m_webservice->m_htmlContentMap[U("/queryuser")] = std::bind(&Webservice::QueryUser, m_webservice, std::placeholders::_1);
         m_webservice->m_htmlContentMap[U("/addrank")] = std::bind(&Webservice::AddRank, m_webservice, std::placeholders::_1);
+        m_webservice->m_htmlContentMap[U("/addrankex")] = std::bind(&Webservice::AddRankEx, m_webservice, std::placeholders::_1);
         m_webservice->m_htmlContentMap[U("/queryrank")] = std::bind(&Webservice::QueryRank, m_webservice, std::placeholders::_1);
         m_webservice->m_htmlContentMap[U("/deleteuser")] = std::bind(&Webservice::DeleteUser, m_webservice, std::placeholders::_1);
     }
@@ -219,7 +220,6 @@ void Webservice::QueryUser(http_request &message)
 
 void Webservice::DeleteUser(http_request &message)
 {
-
     try
     {
         task<json::value> tk = message.extract_json();
@@ -282,9 +282,55 @@ void Webservice::AddRank(http_request &message)
     }
 }
 
+void Webservice::AddRankEx(http_request &message)
+{
+    try
+    {
+        task<json::value> tk = message.extract_json();
+        tk.wait();
+
+        json::value jsonVal = tk.get();
+
+        Log::Main()->info("AddRankEx:{0}.", jsonVal.serialize());
+
+        string_t gameid = jsonVal[U("gameid")].as_string();
+        string_t deviceid = jsonVal[U("deviceid")].as_string();
+        int level = jsonVal[U("level")].as_integer();
+        int score = jsonVal[U("score")].as_integer();
+        int cleartime = jsonVal[U("cleartime")].as_integer();
+        string_t ip = "";
+
+        shared_ptr<RankNumber> rankNum = Database::GetInstance()->AddRankEx(
+                    gameid,
+                    deviceid,
+                    level,
+                    score,
+                    cleartime,
+                    ip
+                    );
+
+        json::value retVal;
+        json::value rootVal;
+
+        if (nullptr != rankNum)
+        {
+            rootVal["current"] = rankNum->current;
+            rootVal["best"] = rankNum->best;
+        }
+
+        retVal["rank"] = rootVal;
+
+        message.reply(status_codes::OK, retVal);
+    }
+    catch(const exception& e)
+    {
+        message.reply(status_codes::ExpectationFailed, to_utf8string(e.what()));
+        Log::Main()->error(e.what());
+    }
+}
+
 void Webservice::QueryRank(http_request &message)
 {
-
     try
     {
         task<json::value> tk = message.extract_json();
