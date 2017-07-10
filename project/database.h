@@ -15,7 +15,7 @@ struct RankItem
 };
 
 struct RankNumber
-        : public enable_shared_from_this<RankItem>
+        : public enable_shared_from_this<RankNumber>
 {
     int current;
     int best;
